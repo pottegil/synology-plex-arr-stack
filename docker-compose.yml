@@ -13,7 +13,7 @@ services:
       - 6881:6881
       - 6881:6881/udp
     volumes:
-      - /volume1/docker/media-stack/gluetun:/gluetun
+      - /volume1/plex/docker/media-stack/gluetun:/gluetun
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - VPN_TYPE=openvpn
@@ -37,8 +37,8 @@ services:
       - TZ=America/Los_Angeles
       - WEBUI_PORT=8080
     volumes:
-      - /volume1/docker/media-stack/qbittorrent:/config
-      - /volume1/downloads:/downloads
+      - /volume1/plex/docker/media-stack/qbittorrent:/config
+      - /volume1/plex/downloads:/downloads
     restart: unless-stopped
 
   prowlarr:
@@ -49,7 +49,7 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/prowlarr:/config
+      - /volume1/plex/docker/media-stack/prowlarr:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -62,9 +62,9 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/radarr:/config
-      - /volume1/downloads:/downloads
-      - /volume1/media/movies:/movies
+      - /volume1/plex/docker/media-stack/radarr:/config
+      - /volume1/plex/downloads:/downloads
+      - /volume1/plex/media/movies:/movies
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -77,9 +77,9 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/sonarr:/config
-      - /volume1/downloads:/downloads
-      - /volume1/media/tv:/tv
+      - /volume1/plex/docker/media-stack/sonarr:/config
+      - /volume1/plex/downloads:/downloads
+      - /volume1/plex/media/tv:/tv
     ports:
       - 8989:8989
     restart: unless-stopped

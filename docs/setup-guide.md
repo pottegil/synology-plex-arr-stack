@@ -20,19 +20,19 @@ Only qBittorrent's traffic goes through the VPN tunnel. Prowlarr/Radarr/Sonarr/P
 
 ---
 
-## 2. Shared folders (do this in DSM first)
+## 2. Shared folder (do this in DSM first)
 
-**Control Panel → Shared Folder → Create**, make these (adjust names to taste, but keep them consistent — you'll reference these paths in every container):
+**Control Panel → Shared Folder → Create** one top-level shared folder: **`plex`**. Everything else lives underneath it as regular subfolders (created via File Station, not as separate DSM shared folders):
 
-| Shared folder | Purpose |
+| Path | Purpose |
 |---|---|
-| `docker` | Config/appdata for every container |
-| `downloads` | qBittorrent's landing zone (temp + complete) |
-| `media` | Final Plex library — subfolders `movies/`, `tv/` |
+| `plex/docker` | Config/appdata for every container |
+| `plex/downloads` | qBittorrent's landing zone (temp + complete) |
+| `plex/media` | Final Plex library — subfolders `movies/`, `tv/` |
 
-Inside `downloads`, Radarr/Sonarr expect qBittorrent to use subfolders like `downloads/complete` and `downloads/incomplete` — the compose file below sets this up.
+Inside `plex/downloads`, Radarr/Sonarr expect qBittorrent to use subfolders like `plex/downloads/complete` and `plex/downloads/incomplete` — the compose file below sets this up.
 
-**Important:** `downloads` and `media` should be on the **same DSM volume**. Radarr/Sonarr "import" completed downloads into the media library by hardlinking (instant, no duplicate space used) — but hardlinks only work within the same filesystem/volume. If they're on different volumes, imports fall back to slow copies and you double your disk usage temporarily.
+Since everything is under one shared folder, they're automatically on the **same DSM volume** — which matters because Radarr/Sonarr "import" completed downloads into the media library by hardlinking (instant, no duplicate space used), and hardlinks only work within the same filesystem/volume. This single-shared-folder layout sidesteps that gotcha by construction.
 
 ---
 
@@ -67,7 +67,7 @@ DSM 7.2+ Container Manager has a **Project** feature that's just docker-compose 
 
 1. Open **Container Manager → Project → Create**
 2. Name it `media-stack`
-3. Path: point it at a new folder, e.g. `/docker/media-stack` (create it in File Station first, inside your `docker` shared folder)
+3. Path: point it at a new folder, e.g. `/plex/docker/media-stack` (create it in File Station first, inside `plex/docker`)
 4. Source: **Create docker-compose.yml**, paste the file below
 5. Container Manager will also let you upload a `.env` file alongside it — do that too (step 5 below)
 
@@ -89,7 +89,7 @@ services:
       - 6881:6881
       - 6881:6881/udp
     volumes:
-      - /volume1/docker/media-stack/gluetun:/gluetun
+      - /volume1/plex/docker/media-stack/gluetun:/gluetun
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - VPN_TYPE=openvpn
@@ -113,8 +113,8 @@ services:
       - TZ=America/Los_Angeles
       - WEBUI_PORT=8080
     volumes:
-      - /volume1/docker/media-stack/qbittorrent:/config
-      - /volume1/downloads:/downloads
+      - /volume1/plex/docker/media-stack/qbittorrent:/config
+      - /volume1/plex/downloads:/downloads
     restart: unless-stopped
 
   prowlarr:
@@ -125,7 +125,7 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/prowlarr:/config
+      - /volume1/plex/docker/media-stack/prowlarr:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -138,9 +138,9 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/radarr:/config
-      - /volume1/downloads:/downloads
-      - /volume1/media/movies:/movies
+      - /volume1/plex/docker/media-stack/radarr:/config
+      - /volume1/plex/downloads:/downloads
+      - /volume1/plex/media/movies:/movies
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -153,15 +153,15 @@ services:
       - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
-      - /volume1/docker/media-stack/sonarr:/config
-      - /volume1/downloads:/downloads
-      - /volume1/media/tv:/tv
+      - /volume1/plex/docker/media-stack/sonarr:/config
+      - /volume1/plex/downloads:/downloads
+      - /volume1/plex/media/tv:/tv
     ports:
       - 8989:8989
     restart: unless-stopped
 ```
 
-**Adjust `/volume1/...` paths** to match your actual volume number (check File Station — could be `/volume1` or `/volume2` etc.) and your shared folder names from step 2.
+**Adjust `/volume1/...` paths** to match your actual volume number (check File Station — could be `/volume1` or `/volume2` etc.) if your `plex` shared folder isn't on volume1.
 
 ### `.env` file (same project folder)
 
@@ -198,7 +198,7 @@ That'll print a number like `54321`. Take that number into qBittorrent's WebUI �
 
 For Plex specifically, I'd steer you away from a container and toward **Package Center → Plex Media Server**. Reason: hardware transcoding (Intel Quick Sync) is much easier to wire up through the native Synology package, and since your whole goal here is *avoiding* quality loss, you want transcoding to be a rare fallback (for a client that can't direct-play your codec) rather than something fighting for `/dev/dri` access inside a container. If your NAS model doesn't have Quick Sync (check your model's spec page), it doesn't matter either way and a container is fine.
 
-After installing: point Plex's library folders at `/volume1/media/movies` and `/volume1/media/tv` (same paths Radarr/Sonarr write to).
+After installing: point Plex's library folders at `/volume1/plex/media/movies` and `/volume1/plex/media/tv` (same paths Radarr/Sonarr write to).
 
 ---
 

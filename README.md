@@ -31,8 +31,8 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 ## Prerequisites on the NAS
 
 - DSM 7.2+ with Container Manager installed
-- Shared folders created: `docker`, `downloads`, `media` (all on the same volume —
-  see docs/setup-guide.md for why)
+- One shared folder, `plex`, created in DSM, with subfolders `docker`, `downloads`,
+  and `media` underneath it (created via File Station — see docs/setup-guide.md)
 - A PIA account with port forwarding enabled on a supporting region (not US)
 
 ## Usage
@@ -55,5 +55,6 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 - Forwarded port rotates ~every 60 days — check
   `docker exec gluetun cat /gluetun/forwarded_port` periodically and update
   qBittorrent's listening port.
-- `downloads` and `media` shared folders must be on the same DSM volume for
-  Radarr/Sonarr hardlink imports to work (avoids slow copy + double disk usage).
+- `downloads` and `media` live under the same `plex` shared folder by design, so
+  they're always on the same DSM volume — required for Radarr/Sonarr hardlink
+  imports to work (avoids slow copy + double disk usage).
