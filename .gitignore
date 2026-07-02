@@ -1,0 +1,14 @@
+# Real secrets — never commit
+.env
+
+# Container appdata / config volumes if ever staged near this repo
+gluetun/
+qbittorrent/
+prowlarr/
+radarr/
+sonarr/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
