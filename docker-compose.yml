@@ -41,6 +41,16 @@ services:
       - /volume1/plex/downloads:/downloads
     restart: unless-stopped
 
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Los_Angeles
+    ports:
+      - 8191:8191
+    restart: unless-stopped
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -84,12 +94,3 @@ services:
       - 8989:8989
     restart: unless-stopped
 
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    environment:
-      - LOG_LEVEL=info
-      - TZ=America/Los_Angeles
-    ports:
-      - 8191:8191
-    restart: unless-stopped
