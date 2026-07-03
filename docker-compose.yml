@@ -41,14 +41,18 @@ services:
       - /volume1/plex/downloads:/downloads
     restart: unless-stopped
 
-  byparr:
-    image: ghcr.io/thephaseless/byparr:latest
-    container_name: byparr
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
     environment:
-      - LOG_LEVEL=info
+      - PUID=1000
+      - PGID=1000
       - TZ=America/Los_Angeles
+    volumes:
+      - /volume1/plex/docker/media-stack/sabnzbd:/config
+      - /volume1/plex/downloads:/downloads
     ports:
-      - 8191:8191
+      - 8081:8080   # 8080 is already taken by gluetun/qbittorrent, so map to 8081 on the host
     restart: unless-stopped
 
   prowlarr:
@@ -62,6 +66,16 @@ services:
       - /volume1/plex/docker/media-stack/prowlarr:/config
     ports:
       - 9696:9696
+    restart: unless-stopped
+
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Los_Angeles
+    ports:
+      - 8191:8191
     restart: unless-stopped
 
   radarr:
@@ -93,4 +107,3 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
-
