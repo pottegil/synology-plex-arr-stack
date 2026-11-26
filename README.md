@@ -23,6 +23,7 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 .
 ├── docker-compose.yml    # the stack definition
 ├── restart-media-stack.sh # NAS: git pull + update images + restart
+├── remote-restart-media-stack.sh # laptop: runs the above on the NAS over SSH
 ├── .env.example           # template for required secrets/config — copy to .env
 ├── .gitignore              # keeps .env and container appdata out of git
 └── docs/
@@ -75,6 +76,18 @@ pull, recreate, prune, status):
 ```bash
 sudo /volume1/plex/docker/synology-plex-arr-stack/restart-media-stack.sh
 ```
+
+From your laptop, without SSHing in first, `remote-restart-media-stack.sh` runs that same
+script on the NAS over SSH (it prompts for your NAS password for `sudo`):
+
+```bash
+./remote-restart-media-stack.sh                     # uses your Mac username
+NAS_USER=your-dsm-admin ./remote-restart-media-stack.sh
+```
+
+Defaults: `NAS_HOST=10.1.1.165`, `NAS_USER=$USER`,
+`NAS_REPO=/volume1/plex/docker/synology-plex-arr-stack` — override any of them with
+environment variables. Push your changes to GitHub first; the NAS pulls from there.
 
 Or run the commands by hand on the NAS as root (`sudo -i`) from the repo folder.
 
