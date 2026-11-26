@@ -1,7 +1,7 @@
 # synology-plex-arr-stack
 
 Docker Compose stack for a Synology DSM 7.x NAS: Gluetun (VPN gateway) + qBittorrent +
-Prowlarr + Radarr + Sonarr, feeding a Plex media library. VPN provider is Private
+Prowlarr + Radarr + Sonarr + Chaptarr (books/audiobooks), feeding a Plex media library. VPN provider is Private
 Internet Access (PIA), routed through Gluetun so only qBittorrent's traffic is tunneled.
 
 ## Architecture
@@ -9,7 +9,7 @@ Internet Access (PIA), routed through Gluetun so only qBittorrent's traffic is t
 ```
 Internet ─── Gluetun (VPN gateway container, PIA)
                  └── qBittorrent (network_mode: service:gluetun)
-Prowlarr ──indexers──> Radarr / Sonarr ──sends jobs──> qBittorrent (via Gluetun)
+Prowlarr ──indexers──> Radarr / Sonarr / Chaptarr ──sends jobs──> qBittorrent (via Gluetun)
 Radarr/Sonarr ──rename/move completed files──> /media/movies, /media/tv
 Plex (native DSM package, not containerized) ──reads──> /media ──streams──> Apple TV
 ```

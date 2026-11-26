@@ -107,3 +107,19 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
+
+  chaptarr:
+    image: chaptarr/chaptarr:latest
+    container_name: chaptarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=America/Los_Angeles
+    volumes:
+      - /volume1/plex/docker/media-stack/chaptarr:/config
+      - /volume1/plex/downloads:/downloads
+      - /volume1/plex/media/books:/books   # ebooks + audiobooks (Chaptarr handles both)
+    ports:
+      - 8789:8789
+    restart: unless-stopped
