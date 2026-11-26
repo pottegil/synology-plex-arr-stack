@@ -22,6 +22,7 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 ```
 .
 ├── docker-compose.yml    # the stack definition
+├── restart-media-stack.sh # NAS: git pull + update images + restart
 ├── .env.example           # template for required secrets/config — copy to .env
 ├── .gitignore              # keeps .env and container appdata out of git
 └── docs/
@@ -68,7 +69,14 @@ First-time setup on the NAS (SSH in, then `sudo -i`):
 
 ## Updating
 
-Run these on the NAS as root (`sudo -i`) from the repo folder.
+The quick way — `restart-media-stack.sh` runs all of the steps below (git pull, image
+pull, recreate, prune, status):
+
+```bash
+sudo /volume1/plex/docker/synology-plex-arr-stack/restart-media-stack.sh
+```
+
+Or run the commands by hand on the NAS as root (`sudo -i`) from the repo folder.
 
 Pull new container versions (all images use `:latest`, so `docker compose up -d` on
 its own never checks for updates):
