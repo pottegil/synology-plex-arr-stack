@@ -123,3 +123,16 @@ services:
     ports:
       - 8789:8789
     restart: unless-stopped
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    environment:
+      - TZ=America/Los_Angeles
+    volumes:
+      - /volume1/plex/docker/media-stack/audiobookshelf/config:/config
+      - /volume1/plex/docker/media-stack/audiobookshelf/metadata:/metadata
+      - /volume1/plex/media/books:/books   # libraries: /books/audiobooks and /books/ebooks
+    ports:
+      - 13378:80   # web UI + iOS app server address: http://<nas-ip>:13378
+    restart: unless-stopped

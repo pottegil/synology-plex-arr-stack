@@ -1,7 +1,7 @@
 # synology-plex-arr-stack
 
 Docker Compose stack for a Synology DSM 7.x NAS: Gluetun (VPN gateway) + qBittorrent +
-Prowlarr + Radarr + Sonarr + Chaptarr (books/audiobooks), feeding a Plex media library. VPN provider is Private
+Prowlarr + Radarr + Sonarr + Chaptarr (books/audiobooks) + Audiobookshelf, feeding a Plex media library. VPN provider is Private
 Internet Access (PIA), routed through Gluetun so only qBittorrent's traffic is tunneled.
 
 ## Architecture
@@ -12,6 +12,7 @@ Internet ─── Gluetun (VPN gateway container, PIA)
 Prowlarr ──indexers──> Radarr / Sonarr / Chaptarr ──sends jobs──> qBittorrent (via Gluetun)
 Radarr/Sonarr ──rename/move completed files──> /media/movies, /media/tv
 Plex (native DSM package, not containerized) ──reads──> /media ──streams──> Apple TV
+Chaptarr ──imports──> /media/books ──read by──> Audiobookshelf ──streams──> iPhone / iPad
 ```
 
 Plex itself runs as the native Synology Package Center app, not a container, to keep
@@ -144,3 +145,16 @@ re-check it (see below).
   (`docker exec -u 1000 <app> mkdir -p /path`) or `chown 1000:1000` + `chmod 775` them.
 - Chaptarr root folders are one type each: use `/books/audiobooks` (Audiobooks) and
   `/books/ebooks` (Ebooks) as two separate root folders.
+
+## Audiobookshelf (audiobooks + ebooks on iPhone/iPad)
+
+Web UI at `http://<nas-ip>:13378`. On first visit, create the admin account, then add
+two libraries:
+
+- **Audiobooks** library → folder `/books/audiobooks`
+- **Books** library → folder `/books/ebooks`
+
+New books that Chaptarr imports show up automatically. On iOS, install the
+**Audiobookshelf** app (or **ShelfPlayer**) and use `http://<nas-ip>:13378` as the
+server address. For access away from home, use Tailscale (Synology Package Center +
+iOS app) rather than forwarding the port on your router.
