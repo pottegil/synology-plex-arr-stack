@@ -1,4 +1,4 @@
-version: "3.8"
+name: media-stack   # must match the Container Manager project name
 
 services:
   gluetun:

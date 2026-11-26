@@ -37,15 +37,71 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 
 ## Usage
 
-1. Clone this repo onto your workstation (or directly note the values — DSM
-   Container Manager Projects can pull from a folder, not a git remote directly, so
-   in practice: clone locally, copy `docker-compose.yml` + your real `.env` into a
-   Container Manager Project folder on the NAS via File Station or `scp`).
-2. `cp .env.example .env` and fill in real PIA credentials.
-3. Deploy via Container Manager → Project, or `docker compose up -d` if running
-   compose directly over SSH on the NAS.
-4. See `docs/setup-guide.md` for full post-deploy configuration (Prowlarr indexers,
+The NAS keeps a git clone of this repo at `/volume1/plex/docker/synology-plex-arr-stack`,
+which is also the folder the Container Manager project (`media-stack`) points at. Make
+changes on your workstation, push to GitHub, then pull on the NAS — don't edit files
+directly on the NAS, or `git pull` will refuse to overwrite them.
+
+First-time setup on the NAS (SSH in, then `sudo -i`):
+
+1. Install **Git Server** from Package Center (it provides the `git` command).
+2. Create an SSH key for root and add `/root/.ssh/github_deploy.pub` to the repo as a
+   read-only **Deploy key** on GitHub, with this in `/root/.ssh/config`:
+
+   ```
+   Host github.com
+     IdentityFile /root/.ssh/github_deploy
+     IdentitiesOnly yes
+   ```
+
+3. Clone the repo and create the real `.env`:
+
+   ```bash
+   cd /volume1/plex/docker && git clone git@github.com:pottegil/synology-plex-arr-stack.git
+   cd synology-plex-arr-stack && cp .env.example .env   # then fill in real PIA credentials
+   git config core.fileMode false
+   ```
+
+4. Start the stack: `docker compose up -d`
+5. See `docs/setup-guide.md` for full post-deploy configuration (Prowlarr indexers,
    Radarr/Sonarr download client wiring, quality profiles, Apple TV playback settings).
+
+## Updating
+
+Run these on the NAS as root (`sudo -i`) from the repo folder.
+
+Pull new container versions (all images use `:latest`, so `docker compose up -d` on
+its own never checks for updates):
+
+```bash
+cd /volume1/plex/docker/synology-plex-arr-stack
+docker compose pull
+docker compose up -d
+docker image prune -f
+```
+
+`pull` downloads newer images, `up -d` recreates only the containers whose image
+changed (settings survive — they live in `/volume1/plex/docker/media-stack/<app>`),
+and `image prune` deletes the old image versions to free space.
+
+Apply changes pushed to this repo (new services, config edits), and update images too:
+
+```bash
+cd /volume1/plex/docker/synology-plex-arr-stack
+git pull
+docker compose pull
+docker compose up -d
+docker image prune -f
+```
+
+Check everything came back up:
+
+```bash
+docker compose ps
+```
+
+If gluetun was updated, qBittorrent restarts with it and the forwarded port may change —
+re-check it (see below).
 
 ## Notes / gotchas
 
@@ -58,3 +114,12 @@ hardware transcoding (Quick Sync) simple. Everything else runs via this compose 
 - `downloads` and `media` live under the same `plex` shared folder by design, so
   they're always on the same DSM volume — required for Radarr/Sonarr hardlink
   imports to work (avoids slow copy + double disk usage).
+- The compose file sets `name: media-stack` so the CLI and Container Manager manage the
+  same project. Without it, `docker compose` names the project after the folder and
+  fails with "container name already in use".
+- New appdata folders created over SSH can inherit a Synology ACL that leaves them
+  `d---------+` and unwritable (the container then restart-loops). Check with
+  `ls -ln /volume1/plex/docker/media-stack/`; create folders from inside the container
+  (`docker exec -u 1000 <app> mkdir -p /path`) or `chown 1000:1000` + `chmod 775` them.
+- Chaptarr root folders are one type each: use `/books/audiobooks` (Audiobooks) and
+  `/books/ebooks` (Ebooks) as two separate root folders.
