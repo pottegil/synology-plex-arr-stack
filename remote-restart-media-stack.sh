@@ -8,7 +8,7 @@
 set -euo pipefail
 
 NAS_HOST="${NAS_HOST:-10.1.1.165}"
-NAS_USER="${NAS_USER:-$USER}"
+NAS_USER="${NAS_USER:-pottegil}"
 NAS_REPO="${NAS_REPO:-/volume1/plex/docker/synology-plex-arr-stack}"
 
 echo "==> Updating media stack on ${NAS_USER}@${NAS_HOST}"

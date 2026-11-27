@@ -82,11 +82,11 @@ From your laptop, without SSHing in first, `remote-restart-media-stack.sh` runs 
 script on the NAS over SSH (it prompts for your NAS password for `sudo`):
 
 ```bash
-./remote-restart-media-stack.sh                     # uses your Mac username
-NAS_USER=your-dsm-admin ./remote-restart-media-stack.sh
+./remote-restart-media-stack.sh                     # logs in as pottegil
+NAS_USER=someone-else ./remote-restart-media-stack.sh   # different DSM account
 ```
 
-Defaults: `NAS_HOST=10.1.1.165`, `NAS_USER=$USER`,
+Defaults: `NAS_HOST=10.1.1.165`, `NAS_USER=pottegil`,
 `NAS_REPO=/volume1/plex/docker/synology-plex-arr-stack` — override any of them with
 environment variables. Push your changes to GitHub first; the NAS pulls from there.
 
